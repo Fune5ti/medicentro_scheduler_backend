@@ -4,23 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Doctor;
+use App\Models\Location;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class DoctorController extends Controller
 {
-
     // List all doctors (public)
     public function index()
     {
-        return response()->json(Doctor::all());
+        return response()->json(Doctor::with('locations')->get());
     }
 
     // Show a specific doctor (public)
     public function show($id)
     {
-        $doctor = Doctor::findOrFail($id);
+        $doctor = Doctor::with('locations')->findOrFail($id);
         return response()->json($doctor);
     }
 
@@ -32,42 +32,44 @@ class DoctorController extends Controller
             'crm' => 'required|string|max:255|unique:doctors,crm',
             'phone' => 'required|string|max:255',
             'email' => 'required|email|unique:doctors,email',
-            'photo_location' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validate image upload
+            'photo_location' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'location_ids' => 'nullable|array',
+            'location_ids.*' => 'exists:locations,id', // Validate each ID
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Check if user has 'admin' role
         $user = Auth::user();
         if (!$user->hasRole('admin')) {
             return response()->json(['message' => 'You do not have permission to create doctors.'], 403);
         }
 
-        // Handle the photo upload if present
         if ($request->hasFile('photo_location')) {
             $image = $request->file('photo_location');
-            $imageName = time() . '.' . $image->getClientOriginalExtension(); // Generate a unique name
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
             Storage::disk('public')->put('doctors/' . $imageName, file_get_contents($image));
-            // Set the photo location to the stored file path
             $photoLocation = 'storage/doctors/' . $imageName;
         } else {
-            $photoLocation = null; // If no photo is uploaded, set as null
+            $photoLocation = null;
         }
 
-        // Create the doctor with the validated data and photo location
         $doctor = Doctor::create([
             'name' => $request->name,
             'crm' => $request->crm,
             'phone' => $request->phone,
             'email' => $request->email,
-            'photo_location' => $photoLocation, // Store the file path
+            'photo_location' => $photoLocation,
         ]);
 
-        return response()->json($doctor, 201);
-    }
+        // Attach locations if provided
+        if ($request->has('location_ids')) {
+            $doctor->locations()->sync($request->location_ids);
+        }
 
+        return response()->json($doctor->load('locations'), 201);
+    }
 
     // Update a doctor (only admin)
     public function update(Request $request, $id)
@@ -78,6 +80,8 @@ class DoctorController extends Controller
             'phone' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:doctors,email,' . $id,
             'photo_location' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'location_ids' => 'nullable|array',
+            'location_ids.*' => 'exists:locations,id',
         ]);
 
         if ($validator->fails()) {
@@ -93,34 +97,33 @@ class DoctorController extends Controller
 
         if ($request->hasFile('photo_location')) {
             $image = $request->file('photo_location');
-            $imageName = time() . '.' . $image->getClientOriginalExtension(); // Generate a unique name
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
             Storage::disk('public')->put('doctors/' . $imageName, file_get_contents($image));
             $doctor->photo_location = 'storage/doctors/' . $imageName;
         }
 
-        $doctor->update($request->only([
-            'name',
-            'crm',
-            'phone',
-            'email',
-            'photo_location'
-        ]));
+        $doctor->update($request->only(['name', 'crm', 'phone', 'email']));
 
-        return response()->json($doctor);
+        // Sync locations if provided
+        if ($request->has('location_ids')) {
+            $doctor->locations()->sync($request->location_ids);
+        }
+
+        return response()->json($doctor->load('locations'));
     }
-
 
     // Delete a doctor (only admin)
     public function destroy($id)
     {
-        // Check if user has 'admin' role
         $user = Auth::user();
         if (!$user->hasRole('admin')) {
-            return response()->json(['message' => 'You do not have permission to create doctors.'], 403);
+            return response()->json(['message' => 'You do not have permission to delete doctors.'], 403);
         }
 
         $doctor = Doctor::findOrFail($id);
+        $doctor->locations()->detach(); // Detach related locations
         $doctor->delete();
+
         return response()->json(null, 204);
     }
 }

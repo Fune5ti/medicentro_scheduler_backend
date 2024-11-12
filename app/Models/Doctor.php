@@ -32,4 +32,9 @@ class Doctor extends Model
         return $this->hasMany(DoctorAvailability::class);
     }
 
+    public function locations()
+    {
+        return $this->belongsToMany(Location::class, 'doctor_location');
+    }
+
 }

@@ -28,4 +28,9 @@ class Location extends Model
         'state',
         'email',
     ];
+
+    public function doctors()
+    {
+        return $this->belongsToMany(Doctor::class, 'doctor_location');
+    }
 }
