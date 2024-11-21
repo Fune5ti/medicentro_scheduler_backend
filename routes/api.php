@@ -11,6 +11,7 @@ use App\Http\Controllers\SpecialityController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Models\Consultation;
+use App\Models\DoctorAvailability;
 
 Route::fallback(function () {
     return response()->json(["message" => "Page Not Found!"], 404);
