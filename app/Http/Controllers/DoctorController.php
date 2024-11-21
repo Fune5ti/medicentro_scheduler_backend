@@ -14,7 +14,7 @@ class DoctorController extends Controller
     // List all doctors (public)
     public function index()
     {
-        return response()->json(Doctor::with('locations')->get());
+        return response()->json(Doctor::with(['locations','specialities','exams'])->get());
     }
 
     // Show a specific doctor (public)
@@ -121,9 +121,26 @@ class DoctorController extends Controller
         }
 
         $doctor = Doctor::findOrFail($id);
-        $doctor->locations()->detach(); // Detach related locations
+        $doctor->locations()->detach();
         $doctor->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function getByLocation($locationId)
+    {
+        $location = Location::find($locationId);
+
+        if (!$location) {
+            return response()->json([
+                'message' => 'Location not found'
+            ], 404);
+        }
+
+        $doctors = $location->doctors()
+            ->with(['specialities', 'exams'])
+            ->get();
+
+        return response()->json($doctors);
     }
 }

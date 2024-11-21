@@ -1,0 +1,495 @@
+{
+    "info": {
+        "name": "Healthcare API",
+        "description": "API collection for healthcare management system",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000/api",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "exec": [
+                    "pm.request.headers.add({",
+                    "    key: 'Authorization',",
+                    "    value: 'Bearer ' + pm.collectionVariables.get('token')",
+                    "});"
+                ],
+                "type": "text/javascript"
+            }
+        }
+    ],
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/register",
+                        "description": "Register new user account",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.access_token) {",
+                                    "    pm.collectionVariables.set('token', jsonData.access_token);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/login",
+                        "description": "Login to get access token",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/logout",
+                        "description": "Logout and invalidate token"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Password Reset",
+            "item": [
+                {
+                    "name": "Request Reset Code",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/password/email",
+                        "description": "Request password reset code via email",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"test@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Check Reset Code",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/password/code/check",
+                        "description": "Verify reset code validity",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"123456\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Reset Password",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/password/code/reset",
+                        "description": "Reset password using code",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"123456\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Doctors",
+            "item": [
+                {
+                    "name": "List Doctors",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/doctor",
+                        "description": "Get all doctors with their locations"
+                    }
+                },
+                {
+                    "name": "Get Doctor",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/doctor/:id",
+                        "description": "Get specific doctor details"
+                    }
+                },
+                {
+                    "name": "Create Doctor",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/doctor",
+                        "description": "Create new doctor (Admin only)",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Dr. John Doe",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "crm",
+                                    "value": "12345",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "phone",
+                                    "value": "123-456-7890",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "email",
+                                    "value": "doctor@example.com",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "photo_location",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "location_ids[]",
+                                    "value": "1",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Doctor",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/doctor/:id",
+                        "description": "Update doctor details (Admin only)",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Dr. John Doe Updated",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "location_ids[]",
+                                    "value": "1",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Doctor",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base_url}}/doctor/:id",
+                        "description": "Delete doctor (Admin only)"
+                    }
+                },
+                {
+                    "name": "Get Doctor Availabilities",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/doctor/:doctorId/availabilities",
+                        "description": "Get doctor's availability schedule"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Locations",
+            "item": [
+                {
+                    "name": "List Locations",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/location",
+                        "description": "Get all locations"
+                    }
+                },
+                {
+                    "name": "Get Location",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/location/:id",
+                        "description": "Get specific location details"
+                    }
+                },
+                {
+                    "name": "Create Location",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/location",
+                        "description": "Create new location (Admin only)",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Main Hospital\",\n    \"address\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"email\": \"hospital@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Get Location Doctors",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/location/:locationId/doctors",
+                        "description": "Get all doctors at a specific location"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Consultations",
+            "item": [
+                {
+                    "name": "List Consultations",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/consultation",
+                        "description": "Get all consultations"
+                    }
+                },
+                {
+                    "name": "Create Consultation",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/consultation",
+                        "description": "Schedule new consultation",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"doctor_availability_id\": 1,\n    \"patient_id\": 1,\n    \"start_time\": \"09:00\",\n    \"end_time\": \"10:00\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Update Consultation",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/consultation/:id",
+                        "description": "Update consultation details",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"completed\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Availabilities",
+            "item": [
+                {
+                    "name": "List Availabilities",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/availabilities",
+                        "description": "Get all doctor availabilities"
+                    }
+                },
+                {
+                    "name": "Create Availability",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/availabilities",
+                        "description": "Create new doctor availability",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"doctor_id\": 1,\n    \"available_date\": \"2024-12-01\",\n    \"start_time\": \"09:00\",\n    \"end_time\": \"17:00\",\n    \"serviceable_type\": \"App\\\\Models\\\\Exam\",\n    \"serviceable_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Exams",
+            "item": [
+                {
+                    "name": "List Exams",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/exams",
+                        "description": "Get all medical exams"
+                    }
+                },
+                {
+                    "name": "Create Exam",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/exams",
+                        "description": "Create new exam type (Admin only)",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Blood Test\",\n    \"description\": \"Complete blood count\",\n    \"estimated_time_in_minutes\": 30,\n    \"doctor_ids\": [1, 2]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Assign Doctor to Exam",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/exams/:examId/assign-doctor",
+                        "description": "Assign doctor to perform exam (Admin only)",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"doctor_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Specialities",
+            "item": [
+                {
+                    "name": "List Specialities",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{base_url}}/specialities",
+                        "description": "Get all medical specialities"
+                    }
+                },
+                {
+                    "name": "Create Speciality",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/specialities",
+                        "description": "Create new speciality (Admin only)",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Cardiology\",\n    \"estimated_time_in_minutes\": 45,\n    \"doctor_ids\": [1, 2]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Assign Doctor to Speciality",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/specialities/:specialityId/assign-doctor",
+                        "description": "Assign doctor to speciality (Admin only)",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"doctor_id\": 1\n}",
+                            "options": {
+                                "raw": { "language": "json" }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Update Speciality",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/specialities/:id",
+                        "description": "Update speciality details (Admin only)",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Cardiology Updated\",\n    \"estimated_time_in_minutes\": 60,\n    \"doctor_ids\": [1, 2, 3]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Speciality",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{base_url}}/specialities/:id",
+                        "description": "Delete speciality (Admin only)"
+                    }
+                }
+            ]
+        }
+    ]
+}
