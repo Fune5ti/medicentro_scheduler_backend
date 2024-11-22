@@ -91,4 +91,22 @@ class LocationController extends Controller
 
         return response()->json(['message' => 'Location deleted successfully']);
     }
+
+    public function getServices($id)
+    {
+        $location = Location::with(['doctors.specialities', 'doctors.exams'])->findOrFail($id);
+
+        $specialities = $location->doctors->flatMap(function ($doctor) {
+            return $doctor->specialities;
+        })->unique('id')->values();
+
+        $exams = $location->doctors->flatMap(function ($doctor) {
+            return $doctor->exams;
+        })->unique('id')->values();
+
+        return response()->json([
+            'specialities' => $specialities,
+            'exams' => $exams
+        ]);
+    }
 }

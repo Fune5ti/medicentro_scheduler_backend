@@ -24,11 +24,11 @@ Route::post('password/code/check', CodeCheckController::class);
 Route::post('password/code/reset', ResetPasswordController::class);
 
 
-Route::group(['middleware' => 'auth:sanctum'],function () {
+Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::apiResource('location', LocationController::class);
     Route::apiResource('doctor', DoctorController::class);
-    Route::apiResource('consultation',Consultation::class);
+    Route::apiResource('consultation', Consultation::class);
     Route::apiResource('availabilities', DoctorAvailabilityController::class);
     Route::apiResource('exams', ExamController::class);
     Route::post('exams/{examId}/assign-doctor', [ExamController::class, 'assignToDoctor']);
@@ -36,4 +36,5 @@ Route::group(['middleware' => 'auth:sanctum'],function () {
     Route::post('specialities/{specialityId}/assign-doctor', [SpecialityController::class, 'assignToDoctor']);
     Route::get('doctor/{doctorId}/availabilities', [DoctorAvailabilityController::class, 'getByDoctor']);
     Route::get('location/{locationId}/doctors', [DoctorController::class, 'getByLocation']);
+    Route::get('location/{id}/services', [LocationController::class, 'getServices']);
 });

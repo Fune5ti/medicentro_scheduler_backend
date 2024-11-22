@@ -255,6 +255,67 @@
             "name": "Locations",
             "item": [
                 {
+                    "name": "Get Location Services",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/location/:id/services",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "location", ":id", "services"],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "",
+                                    "description": "Location ID"
+                                }
+                            ]
+                        },
+                        "description": "Get all specialities and exams available at a specific location"
+                    },
+                    "response": [
+                        {
+                            "name": "Success Response",
+                            "originalRequest": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/api/location/1/services"
+                                }
+                            },
+                            "status": "200 OK",
+                            "code": 200,
+                            "body": {
+                                "specialities": [
+                                    {
+                                        "id": 1,
+                                        "name": "Cardiology",
+                                        "estimated_time_in_minutes": 30
+                                    }
+                                ],
+                                "exams": [
+                                    {
+                                        "id": 1,
+                                        "name": "ECG",
+                                        "description": "Electrocardiogram",
+                                        "estimated_time_in_minutes": 20
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "List Locations",
                     "request": {
                         "method": "GET",
