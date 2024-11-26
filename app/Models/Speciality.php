@@ -10,7 +10,9 @@ class Speciality extends Model
 
     protected $fillable = [
         'name',
-        'estimated_time_in_minutes'
+        'estimated_time_in_minutes',
+        'price',
+        'description'
     ];
 
     /**
@@ -26,5 +28,4 @@ class Speciality extends Model
     {
         return $this->morphMany(DoctorAvailability::class, 'serviceable');
     }
-
 }

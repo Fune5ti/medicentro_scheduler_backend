@@ -9,7 +9,8 @@ class Exam extends Model
     protected $fillable = [
         'name',
         'description',
-        'estimated_time_in_minutes'
+        'estimated_time_in_minutes',
+        'price'
     ];
     protected $dates = [
         'available_date',
@@ -28,5 +29,4 @@ class Exam extends Model
     {
         return $this->morphMany(DoctorAvailability::class, 'serviceable');
     }
-
 }

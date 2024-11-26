@@ -37,4 +37,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('doctor/{doctorId}/availabilities', [DoctorAvailabilityController::class, 'getByDoctor']);
     Route::get('location/{locationId}/doctors', [DoctorController::class, 'getByLocation']);
     Route::get('location/{id}/services', [LocationController::class, 'getServices']);
+    Route::get('doctors/by-service', [DoctorController::class, 'getByService']);
 });

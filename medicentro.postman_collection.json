@@ -248,6 +248,66 @@
                         "url": "{{base_url}}/doctor/:doctorId/availabilities",
                         "description": "Get doctor's availability schedule"
                     }
+                },
+                {
+                    "name": "Get Doctors by Service",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/doctors/by-service?type=speciality&id=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["doctors", "by-service"],
+                            "query": [
+                                {
+                                    "key": "type",
+                                    "value": "speciality",
+                                    "description": "Type of service (speciality or exam)"
+                                },
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID of the speciality or exam"
+                                }
+                            ]
+                        },
+                        "description": "Get all doctors associated with a specific speciality or exam",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ]
+                    },
+                    "response": [
+                        {
+                            "name": "Success Response",
+                            "originalRequest": {
+                                "method": "GET",
+                                "url": {
+                                    "raw": "{{base_url}}/doctors/by-service?type=speciality&id=1"
+                                }
+                            },
+                            "status": "200 OK",
+                            "code": 200,
+                            "body": {
+                                "data": [
+                                    {
+                                        "id": 1,
+                                        "name": "Dr. John Doe",
+                                        "crm": "123456",
+                                        "phone": "123-456-7890",
+                                        "email": "doctor@example.com",
+                                        "photo_location": "storage/doctors/photo.jpg",
+                                        "locations": [],
+                                        "specialities": [],
+                                        "exams": []
+                                    }
+                                ],
+                                "message": "Doctors retrieved successfully"
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -447,22 +507,28 @@
                     }
                 },
                 {
-                    "name": "Create Exam",
-                    "request": {
-                        "method": "POST",
-                        "url": "{{base_url}}/exams",
-                        "description": "Create new exam type (Admin only)",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Blood Test\",\n    \"description\": \"Complete blood count\",\n    \"estimated_time_in_minutes\": 30,\n    \"doctor_ids\": [1, 2]\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
+                    "name": "Exams",
+                    "item": [
+                        {
+                            "name": "Create Exam",
+                            "request": {
+                                "method": "POST",
+                                "url": "{{base_url}}/exams",
+                                "description": "Create new exam type (Admin only)",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"name\": \"Blood Test\",\n    \"description\": \"Complete blood count\",\n    \"estimated_time_in_minutes\": 30,\n    \"price\": 199.99,\n    \"doctor_ids\": [1, 2]\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
+                    ]
                 },
+
                 {
                     "name": "Assign Doctor to Exam",
                     "request": {
@@ -501,7 +567,24 @@
                         "description": "Create new speciality (Admin only)",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"name\": \"Cardiology\",\n    \"estimated_time_in_minutes\": 45,\n    \"doctor_ids\": [1, 2]\n}",
+                            "raw": "{\n    \"name\": \"Cardiology\",\n    \"estimated_time_in_minutes\": 45,\n    \"price\": 299.99,\n    \"doctor_ids\": [1, 2]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Update Speciality",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/specialities/:id",
+                        "description": "Update speciality details (Admin only)",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Cardiology Updated\",\n    \"estimated_time_in_minutes\": 60,\n    \"price\": 349.99,\n    \"doctor_ids\": [1, 2, 3]\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -521,23 +604,6 @@
                             "raw": "{\n    \"doctor_id\": 1\n}",
                             "options": {
                                 "raw": { "language": "json" }
-                            }
-                        }
-                    }
-                },
-                {
-                    "name": "Update Speciality",
-                    "request": {
-                        "method": "PUT",
-                        "url": "{{base_url}}/specialities/:id",
-                        "description": "Update speciality details (Admin only)",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Cardiology Updated\",\n    \"estimated_time_in_minutes\": 60,\n    \"doctor_ids\": [1, 2, 3]\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
                             }
                         }
                     }

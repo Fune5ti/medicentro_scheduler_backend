@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Models\Location;
+use App\Models\Speciality;
+use App\Models\Exam;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -14,7 +16,7 @@ class DoctorController extends Controller
     // List all doctors (public)
     public function index()
     {
-        return response()->json(Doctor::with(['locations','specialities','exams'])->get());
+        return response()->json(Doctor::with(['locations', 'specialities', 'exams'])->get());
     }
 
     // Show a specific doctor (public)
@@ -142,5 +144,57 @@ class DoctorController extends Controller
             ->get();
 
         return response()->json($doctors);
+    }
+    public function getByService(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|string|in:speciality,exam',
+            'id' => 'required|integer|min:1'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            if ($request->type === 'speciality') {
+                $speciality = Speciality::find($request->id);
+
+                if (!$speciality) {
+                    return response()->json([
+                        'message' => 'Speciality not found'
+                    ], 404);
+                }
+
+                $doctors = $speciality->doctors()
+                    ->with(['locations', 'specialities', 'exams'])
+                    ->get();
+            } else { // exam
+                $exam = Exam::find($request->id);
+
+                if (!$exam) {
+                    return response()->json([
+                        'message' => 'Exam not found'
+                    ], 404);
+                }
+
+                $doctors = $exam->doctors()
+                    ->with(['locations', 'specialities', 'exams'])
+                    ->get();
+            }
+
+            return response()->json([
+                'data' => $doctors,
+                'message' => 'Doctors retrieved successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while retrieving doctors',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
