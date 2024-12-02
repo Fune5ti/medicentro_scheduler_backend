@@ -101,7 +101,7 @@ class ExamResource extends Resource
                     ->label('Nome'),
 
                 Tables\Columns\TextColumn::make('price')
-                    ->money('BRL')
+                    ->money('CVE')
                     ->sortable()
                     ->label('Preço'),
 
