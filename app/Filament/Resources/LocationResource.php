@@ -44,6 +44,11 @@ class LocationResource extends Resource
                             ->unique(ignoreRecord: true)
                             ->label('E-mail'),
 
+                        Forms\Components\TextInput::make('phone')
+                            ->required()
+                            ->tel()
+                            ->label('Telefone'),
+
                         Forms\Components\TextInput::make('address')
                             ->required()
                             ->maxLength(255)
@@ -99,7 +104,10 @@ class LocationResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Nome'),
-
+                Tables\Columns\TextColumn::make('phone')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Contacto'),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable()
                     ->sortable()

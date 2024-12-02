@@ -27,6 +27,7 @@ class Location extends Model
         'city',
         'state',
         'email',
+        'phone'
     ];
 
     public function doctors()
