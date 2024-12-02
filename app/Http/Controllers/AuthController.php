@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -18,6 +19,10 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'full_name' => 'required|string|max:255',
+            'nif' => 'required|string|unique:patients,nif',
+            'phone' => 'required|string|max:20',
+            'birth_date' => 'required|date',
         ]);
 
         if ($validator->fails()) {
@@ -29,6 +34,15 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+        ]);
+
+        Patient::create([
+            'full_name' => $request->full_name,
+            'email' => $request->email,
+            'nif' => $request->nif,
+            'phone' => $request->phone,
+            'birth_date' => $request->birth_date,
+            'user_id' => $user->id,
         ]);
 
         // Assign the 'user' role

@@ -25,4 +25,9 @@ class Patient extends Model
     {
         return $this->birth_date ? $this->birth_date->age : null;
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

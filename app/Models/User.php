@@ -58,4 +58,12 @@ class User extends Authenticatable
     {
         return $this->roles->contains('name', $roleName);
     }
+    public function patient()
+    {
+        return $this->hasOne(Patient::class);
+    }
+    public function canAccessPanel(\Filament\Panel $panel): bool
+    {
+        return $this->hasRole('admin');
+    }
 }
