@@ -29,7 +29,6 @@ class Dashboard extends \Filament\Pages\Dashboard
         return [
             ConsultationStatusChartWidget::class,
             ConsultationChartWidget::class,
-            DoctorAvailabilityWidget::class
         ];
     }
 }
