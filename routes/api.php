@@ -10,6 +10,7 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\SpecialityController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConsultationController;
 use App\Models\Consultation;
 use App\Models\DoctorAvailability;
 
@@ -28,7 +29,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::apiResource('location', LocationController::class);
     Route::apiResource('doctor', DoctorController::class);
-    Route::apiResource('consultation', Consultation::class);
+    Route::apiResource('consultation', ConsultationController::class);
     Route::apiResource('availabilities', DoctorAvailabilityController::class);
     Route::apiResource('exams', ExamController::class);
     Route::post('exams/{examId}/assign-doctor', [ExamController::class, 'assignToDoctor']);

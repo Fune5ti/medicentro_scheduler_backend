@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Exam extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
         'description',
@@ -16,6 +19,7 @@ class Exam extends Model
         'available_date',
         'start_time',
         'end_time',
+        'deleted_at'
     ];
 
     /**
