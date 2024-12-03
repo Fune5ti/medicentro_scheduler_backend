@@ -62,11 +62,13 @@ class AuthController extends Controller
 
         $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
-
+        $patient = Patient::where(['user_id' => $user->id])->first() ?? null;
         return response()->json([
             'message' => 'Login successful',
             'access_token' => $token,
             'token_type' => 'Bearer',
+            'user' => $user,
+            'patient' => $patient
         ]);
     }
 
