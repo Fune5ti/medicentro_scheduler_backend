@@ -12,6 +12,8 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\Select;
+use App\Filament\Widgets\DoctorCalendarWidget;
+use Illuminate\Support\Facades\View;
 
 class DoctorResource extends Resource
 {
@@ -112,23 +114,21 @@ class DoctorResource extends Resource
                     ->badge()
                     ->searchable()
                     ->label('Locais'),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->label('Criado em'),
-
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->label('Atualizado em'),
             ])
             ->filters([
                 //
             ])
             ->actions([
+                Tables\Actions\Action::make('view_calendar')
+                    ->label('Ver Agenda')
+                    ->icon('heroicon-o-calendar')
+                    ->modalHeading(fn(Doctor $record): string => "Agenda - Dr(a). {$record->name}")
+                    ->modalContent(function (Doctor $record) {
+                        return View::make('filament.resources.doctor.calendar-modal', [
+                            'doctorId' => $record->id,
+                        ]);
+                    })
+                    ->modalWidth('5xl'),
                 Tables\Actions\EditAction::make()
                     ->label('Editar'),
                 Tables\Actions\DeleteAction::make()

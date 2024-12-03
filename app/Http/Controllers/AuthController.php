@@ -36,7 +36,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        Patient::create([
+        $patient = Patient::create([
             'full_name' => $request->full_name,
             'email' => $request->email,
             'nif' => $request->nif,
@@ -49,7 +49,7 @@ class AuthController extends Controller
         $userRole = Role::where('name', 'user')->first();
         $user->roles()->attach($userRole);
 
-        return response()->json(['message' => 'User registered successfully'], 201);
+        return response()->json(['message' => 'User registered successfully', 'user' => $user, 'patient' => $patient], 201);
     }
 
     public function login(Request $request)

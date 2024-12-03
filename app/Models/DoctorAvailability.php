@@ -14,6 +14,7 @@ class DoctorAvailability extends Model
         'end_time',
         'serviceable_type',
         'serviceable_id',
+        'max_per_day'
     ];
 
     protected $dates = [

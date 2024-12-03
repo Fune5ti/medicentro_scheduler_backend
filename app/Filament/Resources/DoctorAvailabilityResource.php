@@ -84,7 +84,14 @@ class DoctorAvailabilityResource extends Resource
                             ->native(false)
                             ->after('start_time')
                             ->label('Hora de Término'),
-                    ])->columns(2),
+
+                        Forms\Components\TextInput::make('max_per_day')
+                            ->numeric()
+                            ->required()
+                            ->default(1)
+                            ->minValue(1)
+                            ->label('Máximo de Consultas por Dia'),
+                    ])->columns(3),
 
                 Forms\Components\Section::make('Serviço')
                     ->schema([
@@ -152,6 +159,10 @@ class DoctorAvailabilityResource extends Resource
                     ->time()
                     ->sortable()
                     ->label('Término'),
+
+                Tables\Columns\TextColumn::make('max_per_day')
+                    ->label('Máx. Consultas/Dia')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('serviceable_type')
                     ->label('Tipo de Serviço')
@@ -235,8 +246,6 @@ class DoctorAvailabilityResource extends Resource
             'edit' => Pages\EditDoctorAvailability::route('/{record}/edit'),
         ];
     }
-
-
 
     public static function getEloquentQuery(): Builder
     {
