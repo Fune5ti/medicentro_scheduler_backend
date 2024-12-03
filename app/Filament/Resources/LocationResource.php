@@ -11,6 +11,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Select;
+use Illuminate\Database\Eloquent\Model;
 
 class LocationResource extends Resource
 {
@@ -26,6 +27,12 @@ class LocationResource extends Resource
 
     protected static ?string $createButtonLabel = 'Novo Local';
 
+    protected static ?string $recordTitleAttribute = 'Locais';
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->name;
+    }
     public static function form(Form $form): Form
     {
         return $form

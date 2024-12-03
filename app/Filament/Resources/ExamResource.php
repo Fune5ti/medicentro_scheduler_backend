@@ -11,6 +11,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Select;
+use Illuminate\Database\Eloquent\Model;
 
 class ExamResource extends Resource
 {
@@ -25,7 +26,12 @@ class ExamResource extends Resource
     protected static ?string $pluralModelLabel = 'Exames';
 
     protected static ?string $createButtonLabel = 'Novo Exame';
+    protected static ?string $recordTitleAttribute = 'Exame';
 
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->name;
+    }
     public static function form(Form $form): Form
     {
         return $form

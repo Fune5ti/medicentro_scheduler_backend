@@ -14,6 +14,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\Select;
 use App\Filament\Widgets\DoctorCalendarWidget;
 use Illuminate\Support\Facades\View;
+use Illuminate\Database\Eloquent\Model;
 
 class DoctorResource extends Resource
 {
@@ -29,6 +30,12 @@ class DoctorResource extends Resource
 
     protected static ?string $createButtonLabel = 'Novo Médico';
 
+    protected static ?string $recordTitleAttribute = 'Médico';
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->name;
+    }
     public static function form(Form $form): Form
     {
         return $form
