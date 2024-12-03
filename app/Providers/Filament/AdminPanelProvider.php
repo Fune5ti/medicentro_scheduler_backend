@@ -18,9 +18,11 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
+use Spatie\LaravelPackageTools\Package;
 
 class AdminPanelProvider extends PanelProvider
 {
+
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -55,6 +57,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugin(
                 FilamentFullCalendarPlugin::make()
+                    ->plugins(['dayGrid', 'timeGrid', 'list'])
+                    ->config([
+                        'firstDay' => 1,
+                        'headerToolbar' => [
+                            'left' => 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
+                            'center' => 'title'
+                        ]
+                    ])
             );
     }
 }
