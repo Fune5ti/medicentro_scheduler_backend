@@ -11,7 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Get;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 use Filament\Support\Colors\Color;
 
@@ -99,6 +99,30 @@ class ConsultationResource extends Resource
                     ->required()
                     ->default('scheduled')
                     ->label('Status'),
+                Forms\Components\Textarea::make('notes')
+                    ->label('Observações')
+                    ->columnSpanFull()
+                    ->rows(3),
+
+                Forms\Components\FileUpload::make('file_path')
+                    ->label('Arquivo')
+                    ->directory('consultations')
+                    ->visibility('public')
+                    ->downloadable()
+                    ->openable()
+                    ->acceptedFileTypes(['application/pdf', 'image/*'])
+                    ->maxSize(10240) // 10MB
+                    ->columnSpanFull()
+                    ->storeFileNamesIn('file_name')
+                    ->afterStateUpdated(function ($state, $set) {
+                        if ($state) {
+                            // If it's an array (multiple files), get the first one
+                            $fileName = is_array($state) ? basename($state[0]) : basename($state);
+                            $set('file_name', $fileName);
+                        } else {
+                            $set('file_name', null);
+                        }
+                    }),
             ]);
     }
 
@@ -156,6 +180,16 @@ class ConsultationResource extends Resource
                         'canceled' => 'Cancelada',
                         default => $state,
                     }),
+                Tables\Columns\TextColumn::make('notes')
+                    ->label('Observações')
+                    ->limit(50)
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('file_name')
+                    ->label('Arquivo')
+                    ->searchable()
+                    ->url(fn($record) => $record->file_path ? Storage::url($record->file_path) : null, true)
+                    ->openUrlInNewTab(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('doctor')

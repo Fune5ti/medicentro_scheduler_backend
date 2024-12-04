@@ -14,7 +14,10 @@ class Consultation extends Model
         'patient_id',
         'start_time',
         'end_time',
-        'status'
+        'status',
+        'notes',
+        'file_path',
+        'file_name'
     ];
     /**
      * Define relationship with DoctorAvailability.

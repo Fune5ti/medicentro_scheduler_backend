@@ -40,9 +40,9 @@ class DoctorAvailabilityWidget extends FullCalendarWidget
 
                 return [
                     'id' => $availability->id,
-                    'title' => "Dr. {$availability->doctor->name} - " .
+                    'title' => "{$availability->doctor->name} - " .
                         ($availability->serviceable_type === 'App\Models\Exam' ? 'Exame: ' : 'Especialidade: ') .
-                        $availability->serviceable->name . "Das {$start_time} até {$end_time}",
+                        $availability->serviceable->name . " - {$start_time} até {$end_time}",
                     'start' => "{$start_date}",
                     'end' => "{$end_date}",
                     'url' => DoctorAvailabilityResource::getUrl('edit', ['record' => $availability]),

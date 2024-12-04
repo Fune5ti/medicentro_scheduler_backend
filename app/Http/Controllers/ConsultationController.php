@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ConsultationController extends Controller
 {
@@ -43,7 +44,13 @@ class ConsultationController extends Controller
             'patient_data.nif' => 'required_with:patient_data|string|unique:patients,nif',
             'patient_data.phone' => 'required_with:patient_data|string',
             'patient_data.birth_date' => 'required_with:patient_data|date',
+            'notes' => 'nullable|string',
+            'file' => 'nullable|file|max:10240', // 10MB max
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
@@ -78,16 +85,27 @@ class ConsultationController extends Controller
                     $patientId = $patient->id;
                 }
 
-                // Create the consultation
-                $consultation = Consultation::create([
+                $consultationData = [
                     'doctor_availability_id' => $request->doctor_availability_id,
                     'patient_id' => $patientId,
                     'start_time' => $request->start_time,
                     'end_time' => $request->end_time,
                     'user_id' => Auth::user()->id,
-                    'status' => 'scheduled'
-                ]);
+                    'status' => 'scheduled',
+                    'notes' => $request->notes
+                ];
 
+                // Handle file upload if present
+                if ($request->hasFile('file')) {
+                    $file = $request->file('file');
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('consultations', $fileName, 'public');
+
+                    $consultationData['file_path'] = $filePath;
+                    $consultationData['file_name'] = $file->getClientOriginalName();
+                }
+
+                $consultation = Consultation::create($consultationData);
                 $consultation->load(['doctorAvailability.doctor', 'patient', 'user']);
 
                 return response()->json($consultation, 201);
@@ -142,21 +160,31 @@ class ConsultationController extends Controller
             'patient_id' => 'exists:patients,id',
             'start_time' => 'date_format:H:i',
             'end_time' => 'date_format:H:i|after:start_time',
-            'status' => 'in:scheduled,canceled,completed'
+            'status' => 'in:scheduled,canceled,completed',
+            'notes' => 'nullable|string',
+            'file' => 'nullable|file|max:10240',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        if ($request->has(['start_time', 'end_time', 'doctor_availability_id'])) {
-            $availability = DoctorAvailability::find($request->doctor_availability_id ?? $consultation->doctor_availability_id);
-            if (!$this->isDoctorAvailable($availability, $request->start_time, $request->end_time, $consultation->id)) {
-                return response()->json(['message' => 'Doctor is not available at this time'], 422);
+        // Handle file upload if present
+        if ($request->hasFile('file')) {
+            // Delete old file if exists
+            if ($consultation->file_path) {
+                Storage::disk('public')->delete($consultation->file_path);
             }
+
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('consultations', $fileName, 'public');
+
+            $consultation->file_path = $filePath;
+            $consultation->file_name = $file->getClientOriginalName();
         }
 
-        $consultation->update($request->all());
+        $consultation->update($request->except('file'));
         return response()->json($consultation);
     }
 
