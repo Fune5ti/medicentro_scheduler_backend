@@ -16,13 +16,17 @@ class Authenticate
      */
     public function handle(Request $request, Closure $next): Response
     {
-       if(!Auth::check()){
-           $errorResponse = [
-               "success" => false,
-               "message" => "User not authenticated",
-           ];
-           abort(response()->json($errorResponse, Response::HTTP_UNAUTHORIZED));
-       }
-       return $next($request);
+        if (!Auth::check()) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "User not authenticated",
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            return redirect()->route('login');
+        }
+
+        return $next($request);
     }
 }
