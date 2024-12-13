@@ -33,15 +33,17 @@ class ConsultationController extends Controller
 
     public function store(Request $request)
     {
+        $patientData = json_decode($request->patient_data, true) ;
+
+        $request->merge(['patient_data' => $patientData]);
+
         $validator = Validator::make($request->all(), [
             'doctor_availability_id' => 'required|exists:doctor_availabilities,id',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-            'patient_id' => 'required_without:patient_data|exists:patients,id',
-            'patient_data' => 'required_without:patient_id|array',
+            'patient_id' => 'required_without:patient_data|nullable|exists:patients,id',
+            'patient_data' => 'required_without:patient_id|nullable|array',
             'patient_data.full_name' => 'required_with:patient_data|string|max:255',
-            'patient_data.email' => 'required_with:patient_data|email|unique:patients,email',
-            'patient_data.nif' => 'required_with:patient_data|string|unique:patients,nif',
+            'patient_data.email' => 'required_with:patient_data|email',
+            'patient_data.nif' => 'required_with:patient_data|string',
             'patient_data.phone' => 'required_with:patient_data|string',
             'patient_data.birth_date' => 'required_with:patient_data|date',
             'notes' => 'nullable|string',
@@ -52,19 +54,11 @@ class ConsultationController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         try {
-            return DB::transaction(function () use ($request) {
+            return DB::transaction(function () use ($request,$validator) {
                 // Check if doctor availability exists and has space
                 $availability = DoctorAvailability::findOrFail($request->doctor_availability_id);
 
-                // Check if the requested time slot falls within the availability period
-                if (!$this->isDoctorAvailable($availability, $request->start_time, $request->end_time)) {
-                    return response()->json(['message' => 'Doctor is not available at this time'], 422);
-                }
 
                 // Check max_per_day limit
                 $consultationsCount = Consultation::where('doctor_availability_id', $availability->id)
@@ -80,16 +74,24 @@ class ConsultationController extends Controller
 
                 // Handle patient creation if patient_data is provided
                 $patientId = $request->patient_id;
+                $validatedData = $validator->validated();
+                $patientData = $validatedData['patient_data'];
                 if (!$patientId && $request->has('patient_data')) {
-                    $patient = Patient::create($request->patient_data);
-                    $patientId = $patient->id;
+                    $existingPatient = Patient::where('email', $patientData['email'])->first();
+    
+                    if ($existingPatient) {
+                        $patientId = $existingPatient->id;
+                    } else {
+                        $patient = Patient::create($patientData);
+                        $patientId = $patient->id;
+                    }
                 }
 
                 $consultationData = [
                     'doctor_availability_id' => $request->doctor_availability_id,
                     'patient_id' => $patientId,
-                    'start_time' => $request->start_time,
-                    'end_time' => $request->end_time,
+                    'start_time' => $availability->start_time,
+                    'end_time' => $availability->end_time,
                     'user_id' => Auth::user()->id,
                     'status' => 'scheduled',
                     'notes' => $request->notes
@@ -106,7 +108,7 @@ class ConsultationController extends Controller
                 }
 
                 $consultation = Consultation::create($consultationData);
-                $consultation->load(['doctorAvailability.doctor', 'patient', 'user']);
+                $consultation->load(['doctorAvailability.doctor', 'patient']);
 
                 return response()->json($consultation, 201);
             });
